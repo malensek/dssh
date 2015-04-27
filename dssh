@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+################################################################################
+# dssh - Distributed ssh tool. Executes commands across multiple machines in
+#        parallel via ssh.
+#
+#        Version: 0.5
+#        Contact: Matthew Malensek (matthew@malensek.net)
+################################################################################
+
+ssh_opts="-oStrictHostkeyChecking=no \
+          -oForwardX11=no \
+          -oPasswordAuthentication=no"
+
+################################################################################
+
+unset color flock footer lockfile header host_list
+parallel=false
+quiet=false
+active_threads=0
+max_threads=0
+host_list=""
+hosts="${DSSH_HOSTS}"
+
+# Is there a flock utility we can use?
+which flock &> /dev/null && flock=true
+
+print_usage() {
+cat <<EOM
+Usage: $(basename ${0}) [-cpq] [-f host_file...] [-l host_list...]
+       [-o ssh_opts...] [-u username] [-t max_threads] command
+
+$(basename ${0}) runs 'command' on a number of hosts specified by any
+combination of the following:
+    * -f host_file: plain text file(s) with hostnames of machines.
+    * -l host_list: list of hostnames given as the option operand
+    * A plain text list of hosts from stdin.
+    * Setting the DSSH_HOSTS environment variable.
+
+Additional options:
+    * -c                enable colorized output
+    * -o ssh_opt(s)     add options to the ssh command line
+    * -p                execute remote commands in parallel (no thread limit)
+    * -q                silence extra output (hostnames, newlines)
+    * -u username       execute commands as 'username'
+    * -t num_threads    limit the number of parallel threads (implies -p)
+
+EOM
+}
+
+# Adds a file of hostnames to the host list
+add_hostfile() {
+    if [[ ! -e "${@}" || ! -f "${@}" ]]; then
+        echo "Error: File '${@}' could not be read.";
+        return 1
+    fi
+
+    hosts="${hosts} $(cat ${@} 2> /dev/null)"
+}
+
+# If dssh is terminated early, kill any remaining child processes
+clean_children() {
+    kill 0
+}
+trap clean_children SIGINT SIGTERM
+
+thread_done() {
+    (( active_threads-- ))
+}
+trap thread_done SIGUSR1
+
+lock() {
+    if [[ ${flock} == true ]]; then
+        flock -x 40
+        return 0
+    fi
+
+# perl implementation of Linux flock(1) command
+perl <<EOM
+    use Fcntl qw(:flock);
+    open(FH, "<&=40");
+    flock(FH,LOCK_EX);
+EOM
+}
+
+ssh_host() {
+    host=${1}
+    shift 1
+
+    output=$(ssh ${ssh_opts} ${host} ${@} 2>&1)
+    exit_code=${?}
+
+    # ssh defines exit code 255 as an error state
+    [[ ${exit_code} -eq 255 ]] && error=true
+
+    if [[ ${error} == true || ${quiet} == false ]]; then
+
+        # Highlight SSH failures if color is turned on
+        if [[ ${color} == true && ${error} == true ]]; then
+            host=$'\e[0;31m'"${host}"$'\e[0m'
+        fi
+
+        header="-- ${host} --"$'\n'
+        footer=$'\n'
+        output="${header}${output}${footer}"
+    fi
+
+    if [[ -n ${output} ]]; then
+        output="${output}"$'\n'
+    fi
+
+    # acquire lock and print output
+    ( lock; kill -s SIGUSR1 $$; echo -n "${output}" ) 40> "${lockfile}"
+}
+
+while getopts "cf:l:o:pqu:t:" flag; do
+    case ${flag} in
+        c) color=true ;;
+        f) add_hostfile ${OPTARG} ;;
+        l) host_list="${host_list} ${OPTARG}" ;;
+        o) ssh_opts="${ssh_opts} ${OPTARG}" ;;
+        p) parallel=true; ;;
+        q) quiet=true ;;
+        u) ssh_opts="${ssh_opts} -l${OPTARG}" ;;
+        t) parallel=true; max_threads=${OPTARG} ;;
+        ?) print_usage; exit 1 ;;
+    esac
+done
+
+shift $(($OPTIND - 1))
+
+if [[ -z ${@} ]]; then
+    echo "Error: No command specified!"
+    echo
+    print_usage
+    exit 1
+fi
+
+if [[ ! -t 0 ]]; then
+    # hosts were piped in
+    hosts="${hosts} $(cat 2> /dev/null)"
+fi
+
+if [[ -z ${hosts} && -z ${host_list} ]]; then
+    echo "Error: No hostnames specified!"
+    echo
+    print_usage
+    exit 1
+fi
+
+hosts="${hosts} ${host_list}"
+
+if [[ ${parallel} == false ]] ; then
+    max_threads=1
+fi
+
+lockfile="${TMPDIR:-/tmp}/dssh.$$.$RANDOM.lock"
+touch "${lockfile}"
+trap 'rm -f ${lockfile}' EXIT
+
+set -f # Temporarily disable pathname expansion
+for host in ${hosts}; do
+    ssh_host ${host} ${@} &
+    (( active_threads++ ))
+    if [[ ${active_threads} -eq ${max_threads} ]]; then
+        wait
+    fi
+done
+set +f
+
+until wait; do :; done
