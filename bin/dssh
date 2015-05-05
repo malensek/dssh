@@ -86,6 +86,7 @@ add_hostfile() {
 
 # If dssh is terminated early, kill any remaining child processes
 clean_children() {
+    trap - SIGTERM SIGINT
     kill 0
 }
 trap clean_children SIGINT SIGTERM
