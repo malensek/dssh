@@ -65,6 +65,7 @@ combination of the following:
 
 Additional options:
     * -c                enable colorized output
+    * -i id_file        use an identity file for authentication
     * -o ssh_opt(s)     add options to the ssh command line
     * -p                execute remote commands in parallel (no thread limit)
     * -q                silence extra output (hostnames, newlines)
@@ -140,10 +141,11 @@ ssh_host() {
     ( lock; kill -s SIGUSR1 $$; echo -n "${output}" ) 40> "${lockfile}"
 }
 
-while getopts "cf:l:o:pqu:t:" flag; do
+while getopts "cf:i:l:o:pqu:t:" flag; do
     case ${flag} in
         c) color=true ;;
         f) add_hostfile ${OPTARG} ;;
+        i) ssh_opts="${ssh_opts} -i${OPTARG}" ;;
         l) host_list="${host_list} ${OPTARG}" ;;
         o) ssh_opts="${ssh_opts} ${OPTARG}" ;;
         p) parallel=true; ;;
