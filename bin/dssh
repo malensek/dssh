@@ -34,9 +34,9 @@
 #
 ################################################################################
 
-ssh_opts="-oStrictHostkeyChecking=no \
+ssh_opts="-oBatchMode=yes \
           -oForwardX11=no \
-          -oPasswordAuthentication=no"
+          -oStrictHostkeyChecking=no"
 
 ################################################################################
 
