@@ -70,6 +70,7 @@ Additional options:
     * -p                execute remote commands in parallel (no thread limit)
     * -q                silence extra output (hostnames, newlines)
     * -u username       execute commands as 'username'
+    * -s timeout        set how long to wait before timing out (in seconds)
     * -t num_threads    limit the number of parallel threads (implies -p)
 
 EOM
@@ -141,7 +142,7 @@ ssh_host() {
     ( lock; kill -s SIGUSR1 $$; echo -n "${output}" ) 40> "${lockfile}"
 }
 
-while getopts "cf:i:l:o:pqu:t:" flag; do
+while getopts "cf:i:l:o:pqu:s:t:" flag; do
     case ${flag} in
         c) color=true ;;
         f) add_hostfile ${OPTARG} ;;
@@ -151,6 +152,7 @@ while getopts "cf:i:l:o:pqu:t:" flag; do
         p) parallel=true; ;;
         q) quiet=true ;;
         u) ssh_opts="${ssh_opts} -l${OPTARG}" ;;
+        s) ssh_opts="${ssh_opts} -oConnectTimeout=${OPTARG}" ;;
         t) parallel=true; max_threads=${OPTARG} ;;
         ?) print_usage; exit 1 ;;
     esac
