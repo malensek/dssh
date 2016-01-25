@@ -49,7 +49,7 @@ host_list=""
 hosts="${DSSH_HOSTS}"
 
 # Is there a flock utility we can use?
-which flock &> /dev/null && flock=true
+command -v flock &> /dev/null && flock=true
 
 print_usage() {
 cat <<EOM
