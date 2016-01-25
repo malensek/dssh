@@ -126,10 +126,9 @@ ssh_host() {
     [[ ${exit_code} -eq 255 ]] && error=true
 
     if [[ ${error} == true || ${quiet} == false ]]; then
-
-        # Highlight SSH failures if color is turned on
-        if [[ ${color} == true && ${error} == true ]]; then
-            host=$'\e[0;31m'"${host}"$'\e[0m'
+        if [[ ${color} == true ]]; then
+            c=${def_color}; [[ ${error} == true ]] && c=${err_color}
+            host=$'\e[0;'${c}'m'"${host}"$'\e[0m'
         fi
 
         header="-- ${host} --"$'\n'
