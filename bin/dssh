@@ -48,6 +48,9 @@ max_threads=0
 host_list=""
 hosts="${DSSH_HOSTS}"
 
+def_color=34
+err_color=31
+
 # Is there a flock utility we can use?
 command -v flock &> /dev/null && flock=true
 
