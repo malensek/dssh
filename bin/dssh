@@ -41,12 +41,18 @@ ssh_opts="-oBatchMode=yes \
 ################################################################################
 
 unset color flock footer lockfile header host_list
+abbrev=false
+live=false
 parallel=false
 quiet=false
 active_threads=0
 max_threads=0
 host_list=""
 hosts="${DSSH_HOSTS}"
+
+cmd_normal="ssh_host"
+cmd_live="ssh_live"
+cmd="${cmd_normal}"
 
 def_color=34
 err_color=31
@@ -67,6 +73,8 @@ combination of the following:
     * Setting the DSSH_HOSTS environment variable.
 
 Additional options:
+    * -a                active printing of ssh output
+    * -A                active printing with abbreviated hostnames
     * -c                enable colorized output
     * -i id_file        use an identity file for authentication
     * -o ssh_opt(s)     add options to the ssh command line
@@ -144,7 +152,6 @@ ssh_host() {
     ( lock; kill -s SIGUSR1 $$; echo -n "${output}" ) 40> "${lockfile}"
 }
 
-while getopts "cf:i:l:o:pqu:s:t:" flag; do
 ssh_live() {
     host=${1}
     shift 1
@@ -173,7 +180,12 @@ ssh_live() {
     # notify our 'thread pool' that the next task can run
     ( lock; kill -s SIGUSR1 $$ ) 40> "${lockfile}"
 }
+
+
+while getopts "aAcf:i:l:o:pqu:s:t:" flag; do
     case ${flag} in
+        a) cmd="${cmd_live}" ;;
+        A) cmd="${cmd_live}"; abbrev=true ;;
         c) color=true ;;
         f) add_hostfile ${OPTARG} ;;
         i) ssh_opts="${ssh_opts} -i${OPTARG}" ;;
@@ -221,7 +233,7 @@ trap 'rm -f ${lockfile}' EXIT
 
 set -f # Temporarily disable pathname expansion
 for host in ${hosts}; do
-    ssh_host ${host} ${@} &
+    ${cmd} ${host} ${@} &
     (( active_threads++ ))
     if [[ ${active_threads} -eq ${max_threads} ]]; then
         wait
