@@ -145,6 +145,34 @@ ssh_host() {
 }
 
 while getopts "cf:i:l:o:pqu:s:t:" flag; do
+ssh_live() {
+    host=${1}
+    shift 1
+
+    hname=""
+    if [[ ${quiet} == false ]]; then
+        # In abbreviated mode, everything after the first dot character '.' is
+        # removed unless the hostname is an IP address
+        if [[ ${abbrev} == true && "${host}" =~ [^0-9+.] ]]; then
+            hname="${host%%.*}"
+        else
+            hname="${host}"
+        fi
+
+        if [[ ${color} == true ]]; then
+            hname=$'\e[0;34m'"${hname}"$'\e[0m'
+        fi
+
+        hname="${hname} | "
+    fi
+
+    ssh ${ssh_opts} ${host} ${@} 2>&1 | while read line; do
+        echo "${hname}${line}"
+    done
+
+    # notify our 'thread pool' that the next task can run
+    ( lock; kill -s SIGUSR1 $$ ) 40> "${lockfile}"
+}
     case ${flag} in
         c) color=true ;;
         f) add_hostfile ${OPTARG} ;;
