@@ -233,6 +233,10 @@ trap 'rm -f ${lockfile}' EXIT
 
 set -f # Temporarily disable pathname expansion
 for host in ${hosts}; do
+    if [[ "${host:0:1}" == "#" ]]; then
+        continue
+    fi
+
     ${cmd} ${host} ${@} &
     (( active_threads++ ))
     if [[ ${active_threads} -eq ${max_threads} ]]; then
