@@ -29,7 +29,7 @@
 # dssh - Distributed ssh tool. Executes commands across multiple machines in
 #        parallel via ssh.
 #
-#        Version: 0.7
+#        Version: 0.9
 #        Contact: Matthew Malensek (matthew@malensek.net)
 #
 ################################################################################
