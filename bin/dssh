@@ -84,6 +84,7 @@ Additional options:
     * -u username       execute commands as 'username'
     * -s timeout        set how long to wait before timing out (in seconds)
     * -t num_threads    limit the number of parallel threads (implies -p)
+    * -y                allocate PTY (enables screen-based apps and job control)
 
 EOM
 }
@@ -183,7 +184,7 @@ ssh_live() {
 }
 
 
-while getopts "aAcf:i:l:o:pqu:s:t:" flag; do
+while getopts "aAcf:i:l:o:pqu:s:t:y" flag; do
     case ${flag} in
         a) cmd="${cmd_live}" ;;
         A) cmd="${cmd_live}"; abbrev=true ;;
@@ -197,6 +198,7 @@ while getopts "aAcf:i:l:o:pqu:s:t:" flag; do
         u) ssh_opts="${ssh_opts} -l${OPTARG}" ;;
         s) ssh_opts="${ssh_opts} -oConnectTimeout=${OPTARG}" ;;
         t) parallel=true; max_threads=${OPTARG} ;;
+        y) ssh_opts="${ssh_opts} -t -t" ;;
         ?) print_usage; exit 1 ;;
     esac
 done
