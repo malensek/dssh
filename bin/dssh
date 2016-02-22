@@ -186,7 +186,7 @@ ssh_live() {
 
 while getopts "aAcf:i:l:o:pqu:s:t:y" flag; do
     case ${flag} in
-        a) cmd="${cmd_live}" ;;
+        a) cmd="${cmd_live}"; abbrev=false ;;
         A) cmd="${cmd_live}"; abbrev=true ;;
         c) color=true ;;
         f) add_hostfile ${OPTARG} ;;
