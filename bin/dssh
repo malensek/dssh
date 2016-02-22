@@ -221,6 +221,11 @@ if [[ ! -t 0 ]]; then
     hosts="${hosts} $(cat 2> /dev/null)"
 fi
 
+if [[ ! -t 1 ]]; then
+    # our output is being piped somewhere; disable color
+    color=false
+fi
+
 if [[ -z ${hosts} && -z ${host_list} ]]; then
     echo "Error: No hostnames specified!"
     echo
