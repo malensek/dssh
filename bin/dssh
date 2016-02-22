@@ -78,6 +78,7 @@ Additional options:
     * -A                active printing with abbreviated hostnames
     * -c                enable colorized output
     * -i id_file        use an identity file for authentication
+    * -j                job execution mode (alias for -Apy)
     * -o ssh_opt(s)     add options to the ssh command line
     * -p                execute remote commands in parallel (no thread limit)
     * -q                silence extra output (hostnames, newlines)
@@ -184,13 +185,16 @@ ssh_live() {
 }
 
 
-while getopts "aAcf:i:l:o:pqu:s:t:y" flag; do
+while getopts "aAcf:i:jl:o:pqu:s:t:y" flag; do
     case ${flag} in
         a) cmd="${cmd_live}"; abbrev=false ;;
         A) cmd="${cmd_live}"; abbrev=true ;;
         c) color=true ;;
         f) add_hostfile ${OPTARG} ;;
         i) ssh_opts="${ssh_opts} -i${OPTARG}" ;;
+        j) cmd="${cmd_live}"; abbrev=true; \
+            parallel=true; \
+            ssh_opts="${ssh_opts} -t -t" ;;
         l) host_list="${host_list} ${OPTARG}" ;;
         o) ssh_opts="${ssh_opts} ${OPTARG}" ;;
         p) parallel=true; ;;
