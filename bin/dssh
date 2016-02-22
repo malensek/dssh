@@ -90,6 +90,14 @@ Additional options:
 EOM
 }
 
+error_msg() {
+    msg="dssh: ${@}"
+    if [[ ${color} == true && -t 2 ]]; then
+        msg=$'\e[0;'${err_color}'m'"${msg}"$'\e[0m'
+    fi
+    >&2 echo "${msg}"
+}
+
 # Adds a file of hostnames to the host list
 add_hostfile() {
     if [[ ! -e "${@}" || ! -f "${@}" ]]; then
