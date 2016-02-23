@@ -109,7 +109,7 @@ error_die() {
 # Adds a file of hostnames to the host list
 add_hostfile() {
     if [[ ! -e "${@}" || ! -f "${@}" ]]; then
-        echo "Error: File '${@}' could not be read.";
+        error_msg "File '${@}' could not be read."
         return 1
     fi
 
