@@ -40,8 +40,9 @@ ssh_opts="-oBatchMode=yes \
 
 ################################################################################
 
-unset color delay flock footer lockfile header host_list
+unset color flock footer lockfile header host_list
 abbrev=false
+delay=0
 live=false
 parallel=false
 quiet=false
@@ -168,15 +169,12 @@ ssh_host() {
         output="${output}"$'\n'
     fi
 
+    if [[ "${delay}" -gt 0 ]]; then
+        sleep "${delay}"
+    fi
+
     # acquire lock and print output
-    (
-        lock
-        kill -s SIGUSR1 $$
-        echo -n "${output}"
-        if [[ -n ${delay} ]]; then
-            sleep "${delay}"
-        fi
-    ) 40> "${lockfile}"
+    ( lock; kill -s SIGUSR1 $$; echo -n "${output}" ) 40> "${lockfile}"
 }
 
 ssh_live() {
@@ -204,14 +202,12 @@ ssh_live() {
         echo "${hname}${line}"
     done
 
+    if [[ "${delay}" -gt 0 ]]; then
+        sleep "${delay}"
+    fi
+
     # notify our 'thread pool' that the next task can run
-    (
-        lock
-        kill -s SIGUSR1 $$
-        if [[ -n ${delay} ]]; then
-            sleep "${delay}"
-        fi
-    ) 40> "${lockfile}"
+    ( lock; kill -s SIGUSR1 $$ ) 40> "${lockfile}"
 }
 
 
@@ -268,7 +264,7 @@ if [[ ! "${max_threads}" =~ ^[0-9]+$ ]]; then
     error_die "Invalid number of threads: ${max_threads}"
 fi
 
-if [[ ! "${delay}" =~ ^[.0-9][.a-zA-Z0-9]+$ ]]; then
+if [[ "${delay}" -gt 0 && ! "${delay}" =~ ^[.0-9][.a-zA-Z0-9]*$ ]]; then
     # Unfortunately, due to the variations in how sleep(1) is implemented across
     # platforms, this check may allow some invalid inputs to pass by.
     error_die "Invalid delay: ${delay}"
