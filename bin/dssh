@@ -219,7 +219,7 @@ while getopts "aAcf:i:jl:o:pqu:s:t:y" flag; do
         s) ssh_opts="${ssh_opts} -oConnectTimeout=${OPTARG}" ;;
         t) parallel=true; max_threads=${OPTARG} ;;
         y) ssh_opts="${ssh_opts} -t -t" ;;
-        ?) print_usage; exit 1 ;;
+        ?) error_die ;;
     esac
 done
 
