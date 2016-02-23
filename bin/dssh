@@ -270,10 +270,8 @@ fi
 
 if [[ ! "${delay}" =~ ^[.0-9][.a-zA-Z0-9]+$ ]]; then
     # Unfortunately, due to the variations in how sleep(1) is implemented across
-    # platforms, this check may allow some invalid inputs to pass by. If sleep
-    # invocations fail later, dssh will exit.
-    #error_die "Invalid delay: ${delay}"
-    echo
+    # platforms, this check may allow some invalid inputs to pass by.
+    error_die "Invalid delay: ${delay}"
 fi
 
 lockfile="${TMPDIR:-/tmp}/dssh.$$.$RANDOM.lock"
