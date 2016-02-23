@@ -236,9 +236,24 @@ done
 
 shift $(($OPTIND - 1))
 
+# Sanity Checks ################################################################
+
 if [[ -z ${@} ]]; then
     error_die "No command specified!"
 fi
+
+if [[ ! "${max_threads}" =~ ^[0-9]+$ ]]; then
+    error_die "Invalid number of threads: ${max_threads}"
+fi
+
+if [[ "${delay}" -gt 0 && ! "${delay}" =~ ^[.0-9][.a-zA-Z0-9]*$ ]]; then
+    # Unfortunately, due to the variations in how sleep(1) is implemented across
+    # platforms, this check may allow some invalid inputs to pass by.
+    error_die "Invalid delay: ${delay}"
+fi
+
+################################################################################
+
 
 if [[ ! -t 0 ]]; then
     # hosts were piped in
@@ -258,16 +273,6 @@ hosts="${hosts} ${host_list}"
 
 if [[ ${parallel} == false ]] ; then
     max_threads=1
-fi
-
-if [[ ! "${max_threads}" =~ ^[0-9]+$ ]]; then
-    error_die "Invalid number of threads: ${max_threads}"
-fi
-
-if [[ "${delay}" -gt 0 && ! "${delay}" =~ ^[.0-9][.a-zA-Z0-9]*$ ]]; then
-    # Unfortunately, due to the variations in how sleep(1) is implemented across
-    # platforms, this check may allow some invalid inputs to pass by.
-    error_die "Invalid delay: ${delay}"
 fi
 
 lockfile="${TMPDIR:-/tmp}/dssh.$$.$RANDOM.lock"
