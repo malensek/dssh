@@ -98,6 +98,14 @@ error_msg() {
     >&2 echo "${msg}"
 }
 
+error_die() {
+    if [[ -n "${@}" ]]; then
+        error_msg "${@}"
+    fi
+    print_usage
+    exit 1
+}
+
 # Adds a file of hostnames to the host list
 add_hostfile() {
     if [[ ! -e "${@}" || ! -f "${@}" ]]; then
@@ -218,10 +226,7 @@ done
 shift $(($OPTIND - 1))
 
 if [[ -z ${@} ]]; then
-    echo "Error: No command specified!"
-    echo
-    print_usage
-    exit 1
+    error_die "No command specified!"
 fi
 
 if [[ ! -t 0 ]]; then
@@ -235,10 +240,7 @@ if [[ ! -t 1 ]]; then
 fi
 
 if [[ -z ${hosts} && -z ${host_list} ]]; then
-    echo "Error: No hostnames specified!"
-    echo
-    print_usage
-    exit 1
+    error_die "No hostnames specified!"
 fi
 
 hosts="${hosts} ${host_list}"
