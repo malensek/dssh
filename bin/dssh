@@ -40,7 +40,7 @@ ssh_opts="-oBatchMode=yes \
 
 ################################################################################
 
-unset color flock footer lockfile header host_list
+unset color delay flock footer lockfile header host_list
 abbrev=false
 live=false
 parallel=false
@@ -77,6 +77,7 @@ Additional options:
     * -a                active printing of ssh output
     * -A                active printing with abbreviated hostnames
     * -c                enable colorized output
+    * -d delay          sleep for 'delay' after each command execution
     * -i id_file        use an identity file for authentication
     * -j                job execution mode (alias for -Apy)
     * -o ssh_opt(s)     add options to the ssh command line
@@ -168,7 +169,14 @@ ssh_host() {
     fi
 
     # acquire lock and print output
-    ( lock; kill -s SIGUSR1 $$; echo -n "${output}" ) 40> "${lockfile}"
+    (
+        lock
+        kill -s SIGUSR1 $$
+        echo -n "${output}"
+        if [[ -n ${delay} ]]; then
+            sleep "${delay}"
+        fi
+    ) 40> "${lockfile}"
 }
 
 ssh_live() {
@@ -197,15 +205,22 @@ ssh_live() {
     done
 
     # notify our 'thread pool' that the next task can run
-    ( lock; kill -s SIGUSR1 $$ ) 40> "${lockfile}"
+    (
+        lock
+        kill -s SIGUSR1 $$
+        if [[ -n ${delay} ]]; then
+            sleep "${delay}"
+        fi
+    ) 40> "${lockfile}"
 }
 
 
-while getopts "aAcf:i:jl:o:pqu:s:t:y" flag; do
+while getopts "aAcd:f:i:jl:o:pqu:s:t:y" flag; do
     case ${flag} in
         a) cmd="${cmd_live}"; abbrev=false ;;
         A) cmd="${cmd_live}"; abbrev=true ;;
         c) color=true ;;
+        d) delay=${OPTARG} ;;
         f) add_hostfile ${OPTARG} ;;
         i) ssh_opts="${ssh_opts} -i${OPTARG}" ;;
         j) cmd="${cmd_live}"; abbrev=true; \
@@ -253,6 +268,14 @@ if [[ ! "${max_threads}" =~ ^[0-9]+$ ]]; then
     error_die "Invalid number of threads: ${max_threads}"
 fi
 
+if [[ ! "${delay}" =~ ^[.0-9][.a-zA-Z0-9]+$ ]]; then
+    # Unfortunately, due to the variations in how sleep(1) is implemented across
+    # platforms, this check may allow some invalid inputs to pass by. If sleep
+    # invocations fail later, dssh will exit.
+    #error_die "Invalid delay: ${delay}"
+    echo
+fi
+
 lockfile="${TMPDIR:-/tmp}/dssh.$$.$RANDOM.lock"
 touch "${lockfile}"
 trap 'rm -f ${lockfile}' EXIT
@@ -267,6 +290,7 @@ for host in ${hosts}; do
     fi
 
     ${cmd} ${host} ${@} &
+
     (( active_threads++ ))
     if [[ ${active_threads} -eq ${max_threads} ]]; then
         wait
