@@ -1,3 +1,10 @@
+1.0
+---
+* PTYs can now be allocated (-y). This enables screen-based tasks like top(1) to run and also allows job control. For instance, ^C will terminate remote jobs.
+* Alias for 'job execution mode' (-j), which is short for -Apy. Executes long-running tasks on multiple machines, actively prints their output to the controlling terminal, and supports job control.
+* A configurable delay can be added after each command executes
+* Smart color support; color will be disabled if piping to a file or another program
+
 0.9
 ---
 * Allows 'commenting out' host names with the # character to skip particular hosts
