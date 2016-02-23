@@ -249,6 +249,10 @@ if [[ ${parallel} == false ]] ; then
     max_threads=1
 fi
 
+if [[ ! "${max_threads}" =~ ^[0-9]+$ ]]; then
+    error_die "Invalid number of threads: ${max_threads}"
+fi
+
 lockfile="${TMPDIR:-/tmp}/dssh.$$.$RANDOM.lock"
 touch "${lockfile}"
 trap 'rm -f ${lockfile}' EXIT
