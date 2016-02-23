@@ -260,6 +260,9 @@ trap 'rm -f ${lockfile}' EXIT
 set -f # Temporarily disable pathname expansion
 for host in ${hosts}; do
     if [[ "${host:0:1}" == "#" ]]; then
+        if [[ ${quiet} == false ]]; then
+            error_msg "Ignoring disabled host: ${host}"
+        fi
         continue
     fi
 
