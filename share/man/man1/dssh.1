@@ -50,16 +50,23 @@ Enable colorized output. Automatically disabled if stdout is not a terminal.
 Selects an identity file containing a private key to use for authentication.
 .TP
 .I "\-o"\ ssh_opts
+Adds options to be passed through to the ssh command line. Options should be
+quoted to avoid confusing the dssh option parser.
 .TP
 .I "\-p"
+Executes remote commands in parallel, with each remote connection launched on a
+separate thread. By default, output is buffered and printed after the command
+completes unless active printing (-a) is used.
 .TP
 .I "\-q"
 .TP
 .I "\-u"\ username
+Authenticate using a different name than the current user.
 .TP
 .I "\-s"\ timeout
 .TP
 .I "\-t"\ num_threads
+Limits the number of threads used during parallel execution (implies -p).
 .TP
 .I "\-y"
 .SH EXIT STATUS
