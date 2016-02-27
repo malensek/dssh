@@ -55,15 +55,20 @@ quoted to avoid confusing the dssh option parser.
 .TP
 .B "\-p"
 Executes remote commands in parallel, with each remote connection launched on a
-separate thread. By default, output is buffered and printed after the command
-completes unless active printing (-a) is used.
+separate thread (no thread limit). By default, output is buffered and printed
+after the command completes unless active printing
+.B (-a)
+is used.
 .TP
 .B "\-q"
+Quiet output mode; silences extra output, such as hostnames and extra newlines.
+Error messages will still be displayed.
 .TP
 .BI "\-u"\ username
 Authenticate using a different name than the current user.
 .TP
 .BI "\-s"\ timeout
+Configures how long to wait (in seconds) before timing out remote connections.
 .TP
 .BI "\-t"\ num_threads
 Limits the number of threads used during parallel execution (implies -p).
