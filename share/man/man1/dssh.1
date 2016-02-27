@@ -13,7 +13,7 @@
 [\-u\ username]
 [\-s\ timeout]
 [-t\ max_threads]
-.B command
+.I command
 .SH DESCRIPTION
 .B dssh
 is a simple utility for executing commands across several hosts via ssh.
@@ -24,7 +24,7 @@ Remote hosts for command execution are specified by file(s), lists on the
 command line, or hostnames piped from standard input. Whitespace is used to
 distinguish between hosts. A connection is made to each host via ssh and the
 user-defined
-.B command
+.I command
 is executed.
 .PP
 While the basic functionality provided by
@@ -34,41 +34,41 @@ limiting the number of active threads, output collection/formatting, and
 colorization are supported.
 .SH OPTIONS
 .TP
-.I "\-a"
+.B "\-a"
 Enable 'active' printing of ssh output instead of buffering it until the
 command completes. Since this may result in interleaved outputs from multiple
 hosts, the remote hostname is prepended to each output line.
 .TP
-.I "\-A"
+.B "\-A"
 Enable active printing with abbreviated hostnames, where only the first part of
 the name is shown (up to the first '.' character). Useful for long hostnames.
 .TP
-.I "\-c"
+.B "\-c"
 Enable colorized output. Automatically disabled if stdout is not a terminal.
 .TP
-.I "\-i"\ id_file
+.BI "\-i"\ id_file
 Selects an identity file containing a private key to use for authentication.
 .TP
-.I "\-o"\ ssh_opts
+.BI "\-o"\ ssh_opts
 Adds options to be passed through to the ssh command line. Options should be
 quoted to avoid confusing the dssh option parser.
 .TP
-.I "\-p"
+.B "\-p"
 Executes remote commands in parallel, with each remote connection launched on a
 separate thread. By default, output is buffered and printed after the command
 completes unless active printing (-a) is used.
 .TP
-.I "\-q"
+.B "\-q"
 .TP
-.I "\-u"\ username
+.BI "\-u"\ username
 Authenticate using a different name than the current user.
 .TP
-.I "\-s"\ timeout
+.BI "\-s"\ timeout
 .TP
-.I "\-t"\ num_threads
+.BI "\-t"\ num_threads
 Limits the number of threads used during parallel execution (implies -p).
 .TP
-.I "\-y"
+.B "\-y"
 .SH EXIT STATUS
 .SH ENVIRONMENT
 DSSH_HOSTS variable
