@@ -35,12 +35,19 @@ colorization are supported.
 .SH OPTIONS
 .TP
 .I "\-a"
+Enable 'active' printing of ssh output instead of buffering it until the
+command completes. Since this may result in interleaved outputs from multiple
+hosts, the remote hostname is prepended to each output line.
 .TP
 .I "\-A"
+Enable active printing with abbreviated hostnames, where only the first part of
+the name is shown (up to the first '.' character). Useful for long hostnames.
 .TP
 .I "\-c"
+Enable colorized output. Automatically disabled if stdout is not a terminal.
 .TP
 .I "\-i"\ id_file
+Selects an identity file containing a private key to use for authentication.
 .TP
 .I "\-o"\ ssh_opts
 .TP
