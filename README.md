@@ -80,8 +80,7 @@ ENVIRONMENT
 
 The *DSSH\_HOSTS* environment variable affects the starting host list. Additional hosts may be added using the usual flags.
 
-AUTHOR
-======
+WEBSITE
+=======
 
-Matthew Malensek <matt@malensek.net>
 http://sigpipe.io/dssh
