@@ -1,0 +1,112 @@
+.SH NAME
+.PP
+\f[B]dssh\f[] \- ssh for clusters
+.SH SYNOPSIS
+.PP
+\f[B]dssh\f[] [\-aAcjpqy] [\-f\ host_file...] [\-i\ id_file]
+[\-l\ host\-list...] [\-o\ ssh_opts] [\-u\ username] [\-s\ timeout]
+[\-t\ max_threads] \f[I]command\f[]
+.SH DESCRIPTION
+.PP
+\f[B]dssh\f[] is a simple utility designed for executing commands across
+several hosts via ssh.
+Commands may be executed in parallel or sequentially, and a variety of
+formatting and output options are supported.
+.PP
+Remote hosts for command execution are specified by file(s), lists on
+the command line, or hostnames piped from standard input.
+Whitespace is used to distinguish between hosts.
+A connection is made to each host via ssh and the user\-defined
+\f[I]command\f[] is executed.
+.PP
+While the basic functionality provided by \f[B]dssh\f[] can be mimicked
+with a few lines of shell script, additional features such as limiting
+the number of active threads, output collection/formatting, and
+colorization are supported.
+.SH OPTIONS
+.TP
+.B \-a
+Enable \[aq]active\[aq] printing of ssh output instead of buffering it
+until the command completes.
+Since this may result in interleaved outputs from multiple hosts, the
+remote hostname is prepended to each output line.
+.RS
+.RE
+.TP
+.B \-A
+Enable active printing with abbreviated hostnames, where only the first
+part of the name is shown (up to the first \[aq].\[aq] character).
+Useful for long hostnames.
+.RS
+.RE
+.TP
+.B \-c
+Enable colorized output.
+Automatically disabled if stdout is not a terminal.
+.RS
+.RE
+.TP
+.B \-i \f[I]id_file\f[]
+Selects an identity file containing a private key to use for
+authentication.
+.RS
+.RE
+.TP
+.B \-j
+x
+.RS
+.RE
+.TP
+.B \-o \f[I]ssh_opts\f[]
+Adds options to be passed through to the ssh command line.
+Options should be quoted to avoid confusing the dssh option parser.
+.RS
+.RE
+.TP
+.B \-p
+Executes remote commands in parallel, with each remote connection
+launched on a separate thread (no thread limit).
+By default, output is buffered and printed after the command completes
+unless active printing (\f[B]\-a\f[]) is used.
+.RS
+.RE
+.TP
+.B \-q
+Quiet output mode; silences extra output, such as hostnames and extra
+newlines.
+Error messages will still be displayed.
+.RS
+.RE
+.TP
+.B \-u \f[I]username\f[]
+Authenticate using a different name than the current user.
+.RS
+.RE
+.TP
+.B \-s \f[I]timeout\f[]
+Configures how long to wait (in seconds) before timing out remote
+connections.
+.RS
+.RE
+.TP
+.B \-t \f[I]num_threads\f[]
+Limits the number of threads used during parallel execution (implies
+\f[B]\-p\f[]).
+.RS
+.RE
+.TP
+.B \-y
+x
+.RS
+.RE
+.SH EXIT STATUS
+.PP
+Nonzero if errors occurred.
+.SH ENVIRONMENT
+.PP
+The \f[I]DSSH_HOSTS\f[] environment variable affects the starting host
+list.
+Additional hosts may be added using the usual flags.
+.SH WEBSITE
+.PP
+http://sigpipe.io/dssh
