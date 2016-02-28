@@ -1,12 +1,16 @@
 dssh
 ====
 
-dssh is a simple tool for distributing ssh commands across a cluster of machines. See usage details below or checkout the [examples](examples.md).
+dssh is a simple tool for distributing ssh commands across a cluster of machines. See the usage details below or check out the [examples](doc/examples.md).
 
 Dependencies
 ------------
 * Bash 
 * Perl (on non-Linux systems)
+
+Installation
+------------
+Since dssh is just a Bash script, you don't need to compile it. A Makefile is provided to conveniently install dssh and its man page based on your PREFIX environment variable.
 
 
 * * *
