@@ -8,7 +8,7 @@ dssh - ssh for clusters
 
 # SYNOPSIS
 
-dssh  [-aAcpqy]  [-f\ host_file...]   [-i\ id_file]  [-l\ host-list...]  [-o\ ssh_opts] [-u\ username] [-s\ timeout] [-t\ max_threads] *command*
+dssh  [-aAcpqy]  [-f&nbsp;host_file...]   [-i&nbsp;id_file]  [-l&nbsp;host-list...]  [-o&nbsp;ssh_opts] [-u&nbsp;username] [-s&nbsp;timeout] [-t&nbsp;max_threads] *command*
 
 # DESCRIPTION
 
