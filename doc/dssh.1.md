@@ -77,7 +77,9 @@ Nonzero if errors occurred.
 
 ENVIRONMENT
 ===========
-The *DSSH_HOSTS* environment variable affects the starting host list. Additional hosts may be added using the usual flags.
+The *DSSH_HOSTS* environment variable affects the starting host list. Additional hosts may be added using the usual flags listed above.
+
+
 
 WEBSITE
 =======
