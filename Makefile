@@ -6,10 +6,10 @@ MANDIR ?= $(PREFIX)/share/man
 
 all:
 	@echo " - Use 'make install' to install dssh"
-	@echo " - To (re)generate documentation, use 'make docs' (requires pandoc)"
+	@echo " - To (re)generate documentation, use 'make doc' (requires pandoc)"
 
 # Documentation ################################################################
-docs: doc/dssh.1 README.md
+doc: doc/dssh.1 README.md
 
 doc/dssh.1: doc/dssh.1.md
 	pandoc --standalone --to=man $< -o $@
