@@ -11,7 +11,7 @@ NAME
 SYNOPSIS
 ========
 
-**dssh**  [-aAcjpqy]  [-f\ host_file...]   [-i\ id_file]  [-l\ host-list...]  [-o\ ssh_opts] [-u\ username] [-s\ timeout] [-t\ max_threads] *command*
+**dssh**  [-aAcjpqy]  [-f\ host_file...]   [-i\ id_file]  [-l\ host_list...]  [-o\ ssh_opts] [-u\ username] [-s\ timeout] [-t\ max_threads] *command*
 
 
 DESCRIPTION
