@@ -17,12 +17,12 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-**dssh** is a simple utility designed for executing commands across several hosts via ssh.  Commands may be executed in parallel or sequentially, and a variety of formatting and output options are supported.
+**dssh** is a simple utility designed for executing commands across several hosts via ssh.  Commands may be executed in parallel or sequentially, with a variety of formatting and output options.
 
 Remote hosts for command execution are specified by file(s), lists on the command line, or hostnames piped from standard input. Whitespace is used to distinguish between hosts. A connection is made to each host via ssh and the user-defined *command* is executed.
 
 While the basic functionality provided by **dssh** can be mimicked with a few lines of shell script, additional features such as limiting the number of active threads, output collection/formatting, and
-colorization are supported.
+colorization simplify the advanced cases.
 
 
 OPTIONS
