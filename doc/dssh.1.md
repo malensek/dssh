@@ -67,7 +67,7 @@ OPTIONS
 : Limits the number of threads used during parallel execution (implies **-p**).
 
 -y
-: x
+: Allocates a pseudoterminal (PTY). This allows remote screen-based applications to run (such as top(1)), and also enables job control. Care should be taken when redirecting output to files, and the **-q** (quiet) option may be useful if output becomes garbled.
 
 
 EXIT STATUS
