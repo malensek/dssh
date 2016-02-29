@@ -80,6 +80,39 @@ ENVIRONMENT
 The *DSSH_HOSTS* environment variable affects the starting host list. Additional hosts may be added using the usual flags listed above.
 
 
+USAGE EXAMPLES
+==============
+Retrieve uptime information for several hosts in *hosts.txt*:
+
+    dssh -f hosts.txt 'uptime'
+
+Retrieve uptime information as above, but in parallel. To make errors more visible, we enable colorization:
+
+    dssh -p -c -f hosts.txt 'uptime'
+
+Sort our list of hostnames, and then determine who is logged in to each machine. To avoid opening too many connections at once, limit the number of active threads to two:
+
+    sort hosts.txt | dssh -t 2 'who'
+
+Check the contents of /tmp on our cluster of cloud instances using different credentials, and time out connections after 1 second if the remote host doesn't respond:
+
+    dssh -u ec2-user -i credentials.pem.txt -s 1 'ls /tmp'
+
+Run a distributed application on a list of hosts and print output to the local terminal. Also enable job control so when we terminate dssh with ^C all the remote processes are terminated as well:
+
+    dssh -A -p -y -l "host1 host2 host3" 'java -jar ./myapp.jar'
+
+Perform the same operation as above, but use the **-j** alias for -Apy:
+
+    dssh -j -l "host1 host2 host3" 'java -jar ./myapp.jar'
+
+Determine whether Jane is logged in on a set of hosts that run SSH on a non-standard port, using IPv6:
+
+    dssh -pf hosts5000v6.txt -o'-6 -oPort=5000' 'w' | grep -i jane
+
+Print out hosts that do not have a particular directory in their file system (note we suppress extra output with **-q**):
+
+    dssh -q -pf hosts.txt 'ls -d /data/mydir &> /dev/null || hostname'
 
 WEBSITE
 =======
