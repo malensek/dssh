@@ -12,7 +12,7 @@ all:
 docs: doc/dssh.1 README.md
 
 doc/dssh.1: doc/dssh.1.md
-	pandoc --to=man $< -o $@
+	pandoc --standalone --to=man $< -o $@
 
 doc/dssh.1.gh.md: doc/dssh.1.md
 	pandoc --to=markdown_github $< -o $@
