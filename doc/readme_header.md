@@ -1,7 +1,7 @@
 dssh
 ====
 
-dssh is a simple tool for distributing ssh commands across a cluster of machines. See the usage details below or check out the [examples](doc/examples.md).
+dssh is a simple tool for distributing ssh commands across a cluster of machines. See the usage details below or check out the [examples](#usage-examples).
 
 Dependencies
 ------------
