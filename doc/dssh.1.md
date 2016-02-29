@@ -36,11 +36,17 @@ OPTIONS
 -c
 : Enable colorized output. Automatically disabled if stdout is not a terminal.
 
+-f *host_file*
+: Adds plain-text file(s) of machine hostnames to the master host list. Hostnames must be separated by whitespace.
+
 -i *id_file*
 : Selects an identity file containing a private key to use for authentication.
 
 -j
 :  x
+
+-l *host_list*
+: Adds a list of hostnames specified as a string to the master host list. Hostnames must be separated by whitespace.
 
 -o *ssh_opts*
 : Adds options to be passed through to the ssh command line. Options should be quoted to avoid confusing the dssh option parser.
@@ -67,6 +73,7 @@ OPTIONS
 EXIT STATUS
 ===========
 Nonzero if errors occurred.
+
 
 ENVIRONMENT
 ===========
