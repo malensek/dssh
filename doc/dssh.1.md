@@ -43,7 +43,7 @@ OPTIONS
 : Selects an identity file containing a private key to use for authentication.
 
 -j
-:  x
+: Enables *job mode* (alias for -Apy). This mode is useful for executing long-running processes on a collection of remote machines, as any output from the processes will be printed immediately and job control will be enabled (i.e., pressing ^C will terminate remote jobs, if supported).
 
 -l *host_list*
 : Adds a list of hostnames specified as a string to the master host list. Hostnames must be separated by whitespace.
