@@ -12,6 +12,11 @@ Installation
 ------------
 Since dssh is just a Bash script, you don't need to compile it. A Makefile is provided to conveniently install dssh and its man page based on your PREFIX environment variable.
 
+You can also install via [Homebrew](http://brew.sh):
+
+    brew tap malensek/dssh
+    brew install dssh
+
 <br>
 <br>
 
