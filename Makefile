@@ -23,6 +23,14 @@ README.md: doc/readme_header.md doc/dssh.1.gh.md
 clean:
 	rm -f doc/dssh.1.gh.md
 
+release: doc clean
+	mkdir dssh-1.0
+	cp -r bin ./dssh-1.0
+	cp -r doc ./dssh-1.0
+	cp LICENSE.txt ./dssh-1.0
+
+
+
 # Installation #################################################################
 install: all
 	install -d $(DESTDIR)/$(BINDIR)
