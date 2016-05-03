@@ -117,6 +117,10 @@ Print out hosts that do not have a particular directory in their file system (no
 
     dssh -q -pf hosts.txt 'ls -d /data/mydir &> /dev/null || hostname'
 
+Determine how much space is available on the root partition of server host names numbered from 50 through 75 (i.e., server-50, server-51, …, server-75):
+
+    for N in {50..75}; do echo "server-${N}"; done | dssh -p 'df -h /'
+
 WEBSITE
 =======
 http://sigpipe.io/dssh
