@@ -29,7 +29,7 @@
 # dssh - Distributed ssh tool. Executes commands across multiple machines in
 #        parallel via ssh.
 #
-#        Version: 1.0
+#        Version: 1.1
 #        Contact: Matthew Malensek (matt@malensek.net)
 #
 ################################################################################
@@ -40,14 +40,15 @@ ssh_opts="-oBatchMode=yes \
 
 unset color flock footer lockfile header host_list
 abbrev=false
-delay=0
-live=false
-parallel=false
-quiet=false
 active_threads=0
-max_threads=0
+delay=0
 host_list=""
 hosts="${DSSH_HOSTS}"
+live=false
+max_threads=0
+parallel=false
+quiet=false
+reenable=false
 
 cmd_normal="ssh_host"
 cmd_live="ssh_live"
@@ -79,6 +80,7 @@ Additional options:
     * -A                active printing with abbreviated hostnames
     * -c                enable colorized output
     * -d delay          sleep for 'delay' after each command execution
+    * -e                re-enable disabled hosts (prefixed with #)
     * -i id_file        use an identity file for authentication
     * -j                job execution mode (alias for -Apy)
     * -o ssh_opt(s)     add options to the ssh command line
@@ -210,12 +212,13 @@ ssh_live() {
     ( lock; kill -s SIGUSR1 $$ ) 40> "${lockfile}"
 }
 
-while getopts "aAcd:f:i:jl:o:pqu:s:t:y" flag; do
+while getopts "aAcd:ef:i:jl:o:pqu:s:t:y" flag; do
     case ${flag} in
         a) cmd="${cmd_live}"; abbrev=false ;;
         A) cmd="${cmd_live}"; abbrev=true ;;
         c) color=true ;;
         d) delay=${OPTARG} ;;
+        e) reenable=true ;;
         f) add_hostfile ${OPTARG} ;;
         i) ssh_opts="${ssh_opts} -i${OPTARG}" ;;
         j) cmd="${cmd_live}"; abbrev=true; \
@@ -276,10 +279,15 @@ trap 'rm -f ${lockfile}' EXIT
 set -f # Temporarily disable pathname expansion
 for host in ${hosts}; do
     if [[ "${host:0:1}" == "#" ]]; then
-        if [[ ${quiet} == false ]]; then
-            error_msg "Ignoring disabled host: ${host}"
+        if [[ ${reenable} == true ]]; then
+            error_msg "Re-enabling disabled host: ${host}"
+            host="${host:1}"
+        else
+            if [[ ${quiet} == false ]]; then
+                error_msg "Ignoring disabled host: ${host}"
+            fi
+            continue
         fi
-        continue
     fi
 
     ${cmd} ${host} ${@} &
