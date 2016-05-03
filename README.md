@@ -53,6 +53,9 @@ Enable active printing with abbreviated hostnames, where only the first part of 
 -c  
 Enable colorized output. Automatically disabled if stdout is not a terminal.
 
+-e  
+Re-enable disabled hosts (entries prefixed with a \# character)
+
 -f *host\_file*  
 Adds plain-text file(s) of machine hostnames to the master host list. Hostnames must be separated by whitespace.
 
@@ -130,6 +133,10 @@ Determine whether Jane is logged in on a set of hosts that run SSH on a non-stan
 Print out hosts that do not have a particular directory in their file system (note we suppress extra output with **-q**):
 
     dssh -q -pf hosts.txt 'ls -d /data/mydir &> /dev/null || hostname'
+
+Determine how much space is available on the root partition of server host names numbered from 50 through 75 (i.e., server-50, server-51, …, server-75):
+
+    for N in {50..75}; do echo "server-${N}"; done | dssh -p 'df -h /'
 
 WEBSITE
 =======
