@@ -36,6 +36,9 @@ OPTIONS
 -c
 : Enable colorized output. Automatically disabled if stdout is not a terminal.
 
+-e
+: Re-enable disabled hosts (entries prefixed with a # character)
+
 -f *host_file*
 : Adds plain-text file(s) of machine hostnames to the master host list. Hostnames must be separated by whitespace.
 
