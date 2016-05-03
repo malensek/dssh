@@ -1,3 +1,7 @@
+1.1
+---
+* Add option to re-enable disabled hosts (prefixed with #)
+
 1.0
 ---
 * PTYs can now be allocated (-y). This enables screen-based tasks like top(1) to run and also allows job control. For instance, ^C will terminate remote jobs.
