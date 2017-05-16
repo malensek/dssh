@@ -63,11 +63,11 @@ command -v flock &> /dev/null && flock=true
 
 print_usage() {
 cat <<EOM
-Usage: $(basename ${0}) [-aAcpq] [-f host_file...] [-i id_file]
+Usage: $(basename "${0}") [-aAcpq] [-f host_file...] [-i id_file]
        [-l host_list...] [-o ssh_opts...] [-u username] [-s timeout]
        [-t max_threads] command
 
-$(basename ${0}) runs 'command' on a number of hosts specified by any
+$(basename "${0}") runs 'command' on a number of hosts specified by any
 combination of the following:
     * -f host_file: plain text file(s) with hostnames of machines.
     * -l host_list: list of hostnames given as the option operand
