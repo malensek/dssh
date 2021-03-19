@@ -38,7 +38,7 @@ ssh_opts="-oBatchMode=yes \
           -oForwardX11=no \
           -oStrictHostkeyChecking=no"
 
-unset color flock footer lockfile header host_list
+unset cleanup_files color exitfile flock footer lockfile header host_list
 abbrev=false
 active_threads=0
 delay=0
@@ -88,6 +88,7 @@ Additional options:
     * -u username       execute commands as 'username'
     * -s timeout        set how long to wait before timing out (in seconds)
     * -t num_threads    limit the number of parallel threads (implies -p)
+    * -x exit_file      write the exit status for each host to exit_file
     * -y                allocate PTY (enables screen-based apps and job control)
 
 EOM
@@ -156,12 +157,13 @@ ssh_host() {
     [[ ${exit_code} -eq 255 ]] && error=true
 
     if [[ ${error} == true || ${quiet} == false ]]; then
+        host_display="${host}"
         if [[ ${color} == true ]]; then
             c=${def_color}; [[ ${error} == true ]] && c=${err_color}
-            host=$'\e[0;'${c}'m'"${host}"$'\e[0m'
+            host_display=$'\e[0;'${c}'m'"${host}"$'\e[0m'
         fi
 
-        header="-- ${host} --"$'\n'
+        header="-- ${host_display} --"$'\n'
         footer=$'\n'
         output="${header}${output}${footer}"
     fi
@@ -175,7 +177,12 @@ ssh_host() {
     fi
 
     # acquire lock and print output
-    ( lock; kill -s SIGUSR1 $$; echo -n "${output}" ) 40> "${lockfile}"
+    (
+        lock
+        kill -s SIGUSR1 $$
+        echo -n "${output}"
+        echo -e "${exit_code}\t${host}" >> "${exitfile}"
+    ) 40> "${lockfile}"
 }
 
 ssh_live() {
@@ -202,16 +209,21 @@ ssh_live() {
     ssh ${ssh_opts} ${host} ${@} 2>&1 | while read line; do
         echo "${hname}${line}"
     done
+    exit_code=${PIPESTATUS[0]}
 
     if [[ "${delay}" -gt 0 ]]; then
         sleep "${delay}"
     fi
 
     # notify our 'thread pool' that the next task can run
-    ( lock; kill -s SIGUSR1 $$ ) 40> "${lockfile}"
+    (
+        lock
+        kill -s SIGUSR1 $$
+        echo -e "${exit_code}\t${host}" >> "${exitfile}"
+    ) 40> "${lockfile}"
 }
 
-while getopts "aAcd:ef:i:jl:o:pqu:s:t:y" flag; do
+while getopts "aAcd:ef:i:jl:o:pqu:s:t:x:y" flag; do
     case ${flag} in
         a) cmd="${cmd_live}"; abbrev=false ;;
         A) cmd="${cmd_live}"; abbrev=true ;;
@@ -230,6 +242,7 @@ while getopts "aAcd:ef:i:jl:o:pqu:s:t:y" flag; do
         u) ssh_opts="${ssh_opts} -l${OPTARG}" ;;
         s) ssh_opts="${ssh_opts} -oConnectTimeout=${OPTARG}" ;;
         t) parallel=true; max_threads=${OPTARG} ;;
+        x) exitfile="${OPTARG}" ;;
         y) ssh_opts="${ssh_opts} -t -t" ;;
         ?) error_die ;;
     esac
@@ -271,9 +284,17 @@ if [[ ${parallel} == false ]] ; then
     max_threads=1
 fi
 
-lockfile="${TMPDIR:-/tmp}/dssh.$$.$RANDOM.lock"
+lock_base="${TMPDIR:-/tmp}/dssh.$$.$RANDOM"
+lockfile="${lock_base}.lock"
+cleanup_files="${lockfile}"
 touch "${lockfile}"
-trap 'rm -f ${lockfile}' EXIT
+
+if [[ -z "${exitfile}" ]]; then
+    exitfile="${lock_base}.exit"
+    cleanup_files="${cleanup_files} ${exitfile}"
+fi
+
+trap 'rm -f ${cleanup_files}' EXIT
 
 set -f # Temporarily disable pathname expansion
 for host in ${hosts}; do
@@ -299,3 +320,8 @@ done
 set +f
 
 until wait; do :; done
+
+status="$(sort -n "${exitfile}" 2>/dev/null | tail -n 1 | cut -f1)" 2> /dev/null
+if [[ -n "${status}" ]]; then
+    exit "${status}"
+fi
