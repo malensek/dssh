@@ -11,7 +11,7 @@ NAME
 SYNOPSIS
 ========
 
-**dssh**  [-aAcjpqy]  [-f\ host_file...]   [-i\ id_file]  [-l\ host_list...]  [-o\ ssh_opts] [-u\ username] [-s\ timeout] [-t\ max_threads] *command*
+**dssh**  [-aAcjpqy]  [-f\ host_file...]   [-i\ id_file]  [-l\ host_list...]  [-o\ ssh_opts] [-u\ username] [-s\ timeout] [-t\ max_threads] [-x\ exit_file] *command*
 
 
 DESCRIPTION
@@ -69,13 +69,16 @@ OPTIONS
 -t *num_threads*
 : Limits the number of threads used during parallel execution (implies **-p**).
 
+-x *exit_file*
+: Writes the exit status for each host to 'exit_file'. Each line in the file will contain an exit status followed by a tab character and then the corresponding host name.
+
 -y
 : Allocates a pseudoterminal (PTY). This allows remote screen-based applications to run (such as top(1)), and also enables job control. Care should be taken when redirecting output to files, and the **-q** (quiet) option may be useful if output becomes garbled.
 
 
 EXIT STATUS
 ===========
-Nonzero if errors occurred.
+Nonzero if errors occurred; error statuses in the remote ssh commands are propagated, with the largest numeric exit status returned. See the **-x** option if more detailed exit status reporting is desired.
 
 
 ENVIRONMENT
