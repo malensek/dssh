@@ -29,7 +29,7 @@
 # dssh - Distributed ssh tool. Executes commands across multiple machines in
 #        parallel via ssh.
 #
-#        Version: 1.1
+#        Version: 1.2
 #        Contact: Matthew Malensek (matt@malensek.net)
 #
 ################################################################################
@@ -38,7 +38,7 @@ ssh_opts="-oBatchMode=yes \
           -oForwardX11=no \
           -oStrictHostkeyChecking=no"
 
-unset color flock footer lockfile header host_list
+unset cleanup_files color failfile flock footer lockfile header host_list
 abbrev=false
 active_threads=0
 delay=0
@@ -94,7 +94,7 @@ EOM
 }
 
 error_msg() {
-    msg="dssh: ${@}"
+    msg="dssh: $*"
     if [[ ${color} == true && -t 2 ]]; then
         msg=$'\e[0;'${err_color}'m'"${msg}"$'\e[0m'
     fi
@@ -102,8 +102,8 @@ error_msg() {
 }
 
 error_die() {
-    if [[ -n "${@}" ]]; then
-        error_msg "${@}"
+    if [[ $# -gt 0 ]]; then
+        error_msg "$*"
     fi
     print_usage
     exit 1
@@ -111,12 +111,12 @@ error_die() {
 
 # Adds a file of hostnames to the host list
 add_hostfile() {
-    if [[ ! -e "${@}" || ! -f "${@}" ]]; then
-        error_msg "File '${@}' could not be read."
+    if [[ ! -e "${1}" || ! -f "${1}" ]]; then
+        error_msg "File '${1}' could not be read."
         return 1
     fi
 
-    hosts="${hosts} $(cat ${@} 2> /dev/null)"
+    hosts="${hosts} $(cat "${1}" 2> /dev/null)"
 }
 
 # If dssh is terminated early, kill any remaining child processes
@@ -156,12 +156,13 @@ ssh_host() {
     [[ ${exit_code} -eq 255 ]] && error=true
 
     if [[ ${error} == true || ${quiet} == false ]]; then
+        host_display="${host}"
         if [[ ${color} == true ]]; then
             c=${def_color}; [[ ${error} == true ]] && c=${err_color}
-            host=$'\e[0;'${c}'m'"${host}"$'\e[0m'
+            host_display=$'\e[0;'${c}'m'"${host}"$'\e[0m'
         fi
 
-        header="-- ${host} --"$'\n'
+        header="-- ${host_display} --"$'\n'
         footer=$'\n'
         output="${header}${output}${footer}"
     fi
@@ -175,7 +176,14 @@ ssh_host() {
     fi
 
     # acquire lock and print output
-    ( lock; kill -s SIGUSR1 $$; echo -n "${output}" ) 40> "${lockfile}"
+    (
+        lock
+        kill -s SIGUSR1 $$
+        echo -n "${output}"
+        if [[ ${exit_code} -ne 0 ]]; then
+            printf "%s\t%s\n" "${host}" "${exit_code}" >> "${failfile}"
+        fi
+    ) 40> "${lockfile}"
 }
 
 ssh_live() {
@@ -199,16 +207,23 @@ ssh_live() {
         hname="${hname} | "
     fi
 
-    ssh ${ssh_opts} ${host} ${@} 2>&1 | while read line; do
+    ssh ${ssh_opts} ${host} ${@} 2>&1 | while IFS= read -r line; do
         echo "${hname}${line}"
     done
+    exit_code=${PIPESTATUS[0]}
 
     if [[ "${delay}" -gt 0 ]]; then
         sleep "${delay}"
     fi
 
     # notify our 'thread pool' that the next task can run
-    ( lock; kill -s SIGUSR1 $$ ) 40> "${lockfile}"
+    (
+        lock
+        kill -s SIGUSR1 $$
+        if [[ ${exit_code} -ne 0 ]]; then
+            printf "%s\t%s\n" "${host}" "${exit_code}" >> "${failfile}"
+        fi
+    ) 40> "${lockfile}"
 }
 
 while getopts "aAcd:ef:i:jl:o:pqu:s:t:y" flag; do
@@ -218,7 +233,7 @@ while getopts "aAcd:ef:i:jl:o:pqu:s:t:y" flag; do
         c) color=true ;;
         d) delay=${OPTARG} ;;
         e) reenable=true ;;
-        f) add_hostfile ${OPTARG} ;;
+        f) add_hostfile "${OPTARG}" ;;
         i) ssh_opts="${ssh_opts} -i${OPTARG}" ;;
         j) cmd="${cmd_live}"; abbrev=true; \
             parallel=true; \
@@ -235,9 +250,9 @@ while getopts "aAcd:ef:i:jl:o:pqu:s:t:y" flag; do
     esac
 done
 
-shift $(($OPTIND - 1))
+shift $((OPTIND - 1))
 
-if [[ -z ${@} ]]; then
+if [[ $# -eq 0 ]]; then
     error_die "No command specified!"
 fi
 
@@ -271,9 +286,12 @@ if [[ ${parallel} == false ]] ; then
     max_threads=1
 fi
 
-lockfile="${TMPDIR:-/tmp}/dssh.$$.$RANDOM.lock"
+lock_base="${TMPDIR:-/tmp}/dssh.$$.$RANDOM"
+lockfile="${lock_base}.lock"
+failfile="${lock_base}.fail"
+cleanup_files="${lockfile} ${failfile}"
 touch "${lockfile}"
-trap 'rm -f ${lockfile}' EXIT
+trap 'rm -f ${cleanup_files}' EXIT
 
 set -f # Temporarily disable pathname expansion
 for host in ${hosts}; do
@@ -299,3 +317,12 @@ done
 set +f
 
 until wait; do :; done
+
+if [[ -s "${failfile}" ]]; then
+    if [[ ${quiet} == false ]]; then
+        while IFS=$'\t' read -r host exit_code; do
+            error_msg "${host} failed with exit status ${exit_code}"
+        done < "${failfile}"
+    fi
+    exit 1
+fi

@@ -1,6 +1,6 @@
 % DSSH(1)
 % 
-% February 2016
+% July 2026
 
 
 NAME
@@ -75,7 +75,8 @@ OPTIONS
 
 EXIT STATUS
 ===========
-Nonzero if errors occurred.
+Nonzero if one or more ssh jobs fail. Failed hostnames and their exit statuses
+are reported to stderr unless quiet mode (**-q**) is enabled.
 
 
 ENVIRONMENT
@@ -120,7 +121,3 @@ Print out hosts that do not have a particular directory in their file system (no
 Determine how much space is available on the root partition of server host names numbered from 50 through 75 (i.e., server-50, server-51, …, server-75):
 
     for N in {50..75}; do echo "server-${N}"; done | dssh -p 'df -h /'
-
-WEBSITE
-=======
-http://sigpipe.io/dssh

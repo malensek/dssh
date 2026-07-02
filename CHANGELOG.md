@@ -1,13 +1,24 @@
+1.2
+---
+* Propagates ssh errors (as suggested in GH Issue #1):
+    - If any `ssh` job fails, `dssh` exit status will be nonzero
+    - Hosts with jobs that return a nonzero status are reported unless quiet
+      mode (-q) is enabled.
+
 1.1
 ---
 * Add option to re-enable disabled hosts (prefixed with #)
 
 1.0
 ---
-* PTYs can now be allocated (-y). This enables screen-based tasks like top(1) to run and also allows job control. For instance, ^C will terminate remote jobs.
-* Alias for 'job execution mode' (-j), which is short for -Apy. Executes long-running tasks on multiple machines, actively prints their output to the controlling terminal, and supports job control.
+* PTYs can now be allocated (-y). This enables screen-based tasks like top(1) to
+  run and also allows job control. For instance, ^C will terminate remote jobs.
+* Alias for 'job execution mode' (-j), which is short for -Apy. Executes
+  long-running tasks on multiple machines, actively prints their output to the
+  controlling terminal, and supports job control.
 * A configurable delay can be added after each command executes
-* Smart color support; color will be disabled if piping to a file or another program
+* Smart color support; color will be disabled if piping to a file or another
+  program
 
 0.9
 ---

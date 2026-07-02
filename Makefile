@@ -1,6 +1,6 @@
 # dssh Makefile #
 name = dssh
-version = 1.1
+version = 1.2
 
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
